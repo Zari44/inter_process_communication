@@ -1,6 +1,7 @@
-application1:
-	g++ ./parent/main.cpp -o app1
-application2:
-	g++ ./child/main.cpp -o app2
+parent:
+	g++ -std=c++11 ./main_parent.cpp -o app1
 
-all: application1 application2
+child:
+	g++ -std=c++11 ./main_child.cpp -o app2
+
+all: parent child

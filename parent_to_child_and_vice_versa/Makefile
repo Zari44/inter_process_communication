@@ -1,8 +1,10 @@
-parent:
+app1:
 	g++ -std=c++11 parent.cpp -o parent
-child:
+
+app2:
 	g++ -std=c++11 child.cpp -o child
-all: parent child
+
+all: app1 app2
 
 clean: 
 	rm -f parent
