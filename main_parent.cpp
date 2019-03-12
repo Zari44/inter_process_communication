@@ -44,9 +44,11 @@ int main()
     else {
       do {
         scanf("%s", some_data);
-        strcat(some_data,"\n");
-        data_processed = write(parent_to_child[1], some_data, strlen(some_data));      
+        data_processed = write(parent_to_child[1], some_data, strlen(some_data));
         printf("%d - wrote %d bytes\n", getpid(), data_processed);
+	data_processed = read(child_to_parent[0], buffer, BUFSIZ);
+	printf("%d - read %d bytes: %s\n", getpid(), data_processed, buffer);
+         memset(buffer, '\0', sizeof(buffer));
       } while(strcmp(some_data, "quit"));
     }
   }
