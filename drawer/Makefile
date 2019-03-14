@@ -12,7 +12,7 @@
 default: main
 
 main:
-	g++ -std=c++11 main_drawer.cpp `simple2d --libs` -o drawer
+	g++ -g -I . -std=c++11 main_drawer.cpp `simple2d --libs` -o drawer
 
 # $(TARGET): $(OBJECT_FILES)
 # 	$(CXX) $(CFLAGS) $(INC_PATH) $(LIB_PATH) $(OBJECT_FILES) -o $(TARGET)

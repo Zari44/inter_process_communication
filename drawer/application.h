@@ -9,7 +9,7 @@ struct Size{
 	int height;
 };
 
-class Application{
+/*class Application{
 public:
 	void start();
 	static Application& getInstance(){
@@ -31,6 +31,27 @@ private:
 	void stop();
 	static void static_update() {};
 	static void static_render() {};
+};*/
+
+class Application{
+public:
+	static Application* instance;
+
+	static Application* getInstance();
+    void start();
+	Application(Application const&)     = delete;
+    void operator=(Application const&)  = delete;
+	void update();
+	void render();
+private:
+	Application();
+
+
+	S2D_Window *window;
+	Size window_size;
+	std::string command;
+
+	void stop();
 };
 
 #endif

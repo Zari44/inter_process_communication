@@ -13,39 +13,11 @@
 
 
 
-#include <simple2d.h>
 #include <string>
 #include <iostream>
-// #include <application.h>
+#include <application.h>
+Application* Application::instance = NULL;
 
-struct Size{
-	int width;
-	int height;
-};
-
-class Application{
-public:
-	void start();
-	static Application& getInstance(){
-        static Application instance;
-        return instance;
-    }
-	Application(Application const&)     = delete;
-    void operator=(Application const&)  = delete;
-private:
-	Application();
-    static Application instance;	
-    static void update_wrapper();
-	static void render_wrapper();
-	S2D_Window *window;
-	Size window_size;
-	std::string command;
-	void update();
-	void render();
-	void stop();
-	static void static_update() {};
-	static void static_render() {};
-};
 
 Application::Application() {
 	window_size.width = 640;
@@ -53,13 +25,29 @@ Application::Application() {
 	window->fps_cap = 5;
 }
 
-// void Application::update_wrapper(){
-// 	Application::getInstance().update();
-// }
+Application* Application::getInstance(){
+	if (Application::instance == NULL)
+		Application::instance = new Application();
+    return Application::instance;
+}
 
-// void Application::render_wrapper(){
-// 	Application::getInstance().render();
-// }
+void update_wrapper(){
+	std::cout << "update_wrapper" << std::endl;
+	// Application::getInstance()->update();
+}
+void render_wrapper(){
+	std::cout << "render_wrapper" << std::endl;
+	// Application::getInstance()->render();
+}
+
+void update_wrapper2(){
+	std::cout << "update_wrapper2" << std::endl;
+}
+void render_wrapper2(){
+	std::cout << "render_wrapper2" << std::endl;
+}
+
+
 
 void Application::update() {
 	
@@ -78,12 +66,13 @@ void Application::render() {
 }
 
 void Application::start() {
-	// void (Application::* ptrupdate)() = &Application::update;
-	// void (Application::* ptrrender)() = &Application::render;
-	window = S2D_CreateWindow("Window", window_size.width, window_size.height, 
-										getInstance().update(), 
-										getInstance().render(), 
-										0);
+	std::cout << "start" << std::endl;
+	update_wrapper();
+	render_wrapper();
+	S2D_Window* window2  = S2D_CreateWindow("Window", 100, 100, 
+										              update_wrapper2, 
+										              render_wrapper2, 
+										              0);
 }
 
 void Application::stop() {
@@ -139,8 +128,13 @@ void Application::stop() {
 // }
 
 int main() {
-  Application& app = Application::getInstance();
-  app.start();
+  std::cout << "main" << std::endl;
+  Application* app = Application::getInstance();
+  app->start();
+	// S2D_Window* window2  = S2D_CreateWindow("Window", 100, 100, 
+	// 									              update_wrapper2, 
+	// 									              render_wrapper2, 
+	// 									              0);
   // message = "";
   // window = S2D_CreateWindow("Window", 640, 480, update, render, 0);
   
