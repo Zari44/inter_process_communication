@@ -16,7 +16,7 @@
 #include <simple2d.h>
 #include <string>
 #include <iostream>
-
+// #include <application.h>
 
 struct Size{
 	int width;
@@ -25,22 +25,41 @@ struct Size{
 
 class Application{
 public:
-	Application();
 	void start();
-private:	
+	static Application& getInstance(){
+        static Application instance;
+        return instance;
+    }
+	Application(Application const&)     = delete;
+    void operator=(Application const&)  = delete;
+private:
+	Application();
+    static Application instance;	
+    static void update_wrapper();
+	static void render_wrapper();
 	S2D_Window *window;
 	Size window_size;
 	std::string command;
 	void update();
 	void render();
 	void stop();
+	static void static_update() {};
+	static void static_render() {};
 };
 
 Application::Application() {
 	window_size.width = 640;
 	window_size.height = 480;
-	window->fps_cap = 1;
+	window->fps_cap = 5;
 }
+
+// void Application::update_wrapper(){
+// 	Application::getInstance().update();
+// }
+
+// void Application::render_wrapper(){
+// 	Application::getInstance().render();
+// }
 
 void Application::update() {
 	
@@ -58,20 +77,19 @@ void Application::render() {
          	 	 100, 150, 1, 1, 1, 1);
 }
 
-
 void Application::start() {
-	window = S2D_CreateWindow("Window", window_size.width,
-									    window_size.height,
-									    update, render, 0);
+	// void (Application::* ptrupdate)() = &Application::update;
+	// void (Application::* ptrrender)() = &Application::render;
+	window = S2D_CreateWindow("Window", window_size.width, window_size.height, 
+										getInstance().update(), 
+										getInstance().render(), 
+										0);
 }
 
 void Application::stop() {
 	S2D_Close(window);
 	S2D_FreeWindow(window);
 }
-
-
-
 // struct Point{
 // 	int x;
 // 	int y;
@@ -121,7 +139,7 @@ void Application::stop() {
 // }
 
 int main() {
-  Application app;
+  Application& app = Application::getInstance();
   app.start();
   // message = "";
   // window = S2D_CreateWindow("Window", 640, 480, update, render, 0);
