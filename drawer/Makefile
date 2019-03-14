@@ -1,21 +1,21 @@
-# OBJECT_FILES = triangle.o
-# CXX = g++
-# CXXFLAGS = -Wall
+CXX = g++
+CXXFLAGS = -Wall -g -std=c++11
 
 # LIB_PATH = -L /usr/local/lib/
 # LIB = simple2d
 
 # INC_PATH = -I /usr/local/include/
 
+LIBS = application.cpp 
+TARGET = drawer
 
-# TARGET = drawer
 default: main
 
 main:
-	g++ -g -I . -std=c++11 main_drawer.cpp `simple2d --libs` -o drawer
+	$(CXX)  -I . $(CXXFLAGS) $(LIBS) `simple2d --libs` main_drawer.cpp  -o $(TARGET)
 
 # $(TARGET): $(OBJECT_FILES)
-# 	$(CXX) $(CFLAGS) $(INC_PATH) $(LIB_PATH) $(OBJECT_FILES) -o $(TARGET)
+# 	 $(CFLAGS) $(INC_PATH) $(LIB_PATH) $(OBJECT_FILES) 
 
 # triangle.o: triangle.c
 # 	$(CXX) $(CFLAGS) $(INC_PATH) $(LIB_PATH) -c triangle.c

@@ -15,70 +15,10 @@
 
 #include <string>
 #include <iostream>
-#include <application.h>
-Application* Application::instance = NULL;
-
-
-Application::Application() {
-	window_size.width = 640;
-	window_size.height = 480;
-	window->fps_cap = 5;
-}
-
-Application* Application::getInstance(){
-	if (Application::instance == NULL)
-		Application::instance = new Application();
-    return Application::instance;
-}
-
-void update_wrapper(){
-	std::cout << "update_wrapper" << std::endl;
-	// Application::getInstance()->update();
-}
-void render_wrapper(){
-	std::cout << "render_wrapper" << std::endl;
-	// Application::getInstance()->render();
-}
-
-void update_wrapper2(){
-	std::cout << "update_wrapper2" << std::endl;
-}
-void render_wrapper2(){
-	std::cout << "render_wrapper2" << std::endl;
-}
+#include "application.h"
 
 
 
-void Application::update() {
-	
-	std::cin >> command;
-	std::cout << command << std::endl;
-	if (command == "quit"){
-		this->stop();
-	}
-}
-
-void Application::render() {
-	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
-         	 	 150, 100, 1, 1, 1, 1,
-         	 	 150, 150, 1, 1, 1, 1,
-         	 	 100, 150, 1, 1, 1, 1);
-}
-
-void Application::start() {
-	std::cout << "start" << std::endl;
-	update_wrapper();
-	render_wrapper();
-	S2D_Window* window2  = S2D_CreateWindow("Window", 100, 100, 
-										              update_wrapper2, 
-										              render_wrapper2, 
-										              0);
-}
-
-void Application::stop() {
-	S2D_Close(window);
-	S2D_FreeWindow(window);
-}
 // struct Point{
 // 	int x;
 // 	int y;
@@ -131,10 +71,6 @@ int main() {
   std::cout << "main" << std::endl;
   Application* app = Application::getInstance();
   app->start();
-	// S2D_Window* window2  = S2D_CreateWindow("Window", 100, 100, 
-	// 									              update_wrapper2, 
-	// 									              render_wrapper2, 
-	// 									              0);
   // message = "";
   // window = S2D_CreateWindow("Window", 640, 480, update, render, 0);
   

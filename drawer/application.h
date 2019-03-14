@@ -36,22 +36,27 @@ private:
 class Application{
 public:
 	static Application* instance;
-
 	static Application* getInstance();
     void start();
-	Application(Application const&)     = delete;
-    void operator=(Application const&)  = delete;
 	void update();
 	void render();
+    Application(Application const&)     = delete;
+    void operator=(Application const&)  = delete;
 private:
 	Application();
-
-
+	~Application();
 	S2D_Window *window;
 	Size window_size;
-	std::string command;
-
+	void parse_command(std::string& command);
 	void stop();
+	int action;
+	// enum actions 
+	// {   
+	// 	spring = 0, 
+ //    	summer = 4, 
+ //    	autumn = 8,
+ //    	winter = 12
+	// };
 };
 
 #endif
