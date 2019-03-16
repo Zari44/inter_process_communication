@@ -52,11 +52,14 @@ void Application::start() {
 void Application::update() {
 	std::string command;
 	std::cin >> command;
-	// std::cout << command << std::endl;
+	std::cout << "Input command is: " << command << std::endl;
 	parse_command(command);
 }
 
 void Application::render() {
+	window->viewport.width  = window_size.width;
+	window->viewport.height = window_size.height;
+	
 	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
          	 	 150, 100, 1, 1, 1, 1,
          	 	 150, 150, 1, 1, 1, 1,
@@ -86,15 +89,16 @@ void Application::parse_command(std::string& command) {
 		window_size.height = std::stoi(strings[1]);
 	}
 	else if (strings[0] == "DRAW_RECTANGLE") {
-
+		// std::cout << "Comand draw";
 	}
 	else if (strings[0] == "DRAW_TRIANGLE") {
-		
+		// std::cout << "Invalid command. It must have two parameters.";
 	}
 	else if (strings[0] == "RENDER") {
-		
+		// std::cout << "Invalid command. It must have two parameters.";
 	}	
 	else if (strings[0] == "quit") {
+		// std::cout << "Invalid command. It must have two parameters.";
 		this->stop();
 	}
 }
