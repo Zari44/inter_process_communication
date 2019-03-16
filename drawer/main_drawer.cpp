@@ -67,14 +67,33 @@
 // 	Point v4 = Point(v1.x, v3.y);
 // }
 
-int main() {
-  std::cout << "main" << std::endl;
-  Application* app = Application::getInstance();
-  app->start();
-  // message = "";
-  // window = S2D_CreateWindow("Window", 640, 480, update, render, 0);
+int main(int argc, char *argv[]) {
+  std::cout << "Drawing process starts" << std::endl;
+  std::cout << "Drawing arguments are: " << std::endl;
+
+  for (int i = 0; i < argc; ++i) {
+    std::cout << i << " : " << argv[i] << std::endl;
+  }  
+
+  int pipe_read_from = std::atoi(argv[1]);
+  int pipe_write_to = std::atoi(argv[2]);
+  char buffer[BUFSIZ + 1];
+  memset(buffer, '\0', sizeof(buffer));
+  std::cout << "pipe_read_from = " << pipe_read_from << std::endl;
+  std::cout << "pipe_write_to = " << pipe_write_to << std::endl;
   
-  // S2D_Show(window);
+  Application* app = Application::getInstance(pipe_read_from, pipe_write_to);
+  app->start();
+
+  while(strcmp(buffer, "quit")) {
+    int data_processed = 0;
+    data_processed = read(pipe_read_from, buffer, BUFSIZ);
+    std::cout << getpid() << " - read " << data_processed << " bytes: " << buffer << "\n";
+    data_processed = write(pipe_write_to, buffer, strlen(buffer));
+    std::cout << getpid() << " - wrote " << data_processed << " bytes: " << buffer << "\n";
+    memset(buffer, '\0', strlen(buffer));
+  }
+  printf("Child process exits\n");
   
   
   return 0;

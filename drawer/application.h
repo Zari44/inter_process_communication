@@ -47,7 +47,7 @@ private:
 	~Application();
 	S2D_Window *window;
 	Size window_size;
-	void parse_command(std::string& command);
+	std::string parse_command(std::string& command);
 	void stop();
 	int pipe_read_from;
     int pipe_write_to;
