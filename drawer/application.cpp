@@ -51,20 +51,18 @@ void Application::start() {
 
 void Application::update() {
 	std::cout << "Start update:\n";
+	const int COMMAND_MAX_SIZE = 100;
 	char buffer[BUFSIZ + 1];
     memset(buffer, '\0', sizeof(buffer));
 
-	int data_processed = read(pipe_read_from, buffer, BUFSIZ);
+	int data_processed = read(pipe_read_from, buffer, COMMAND_MAX_SIZE);
 
-	std::string command(buffer);
-	std::cout << "Received command: " << buffer << std::endl;
+	std::string input_command(buffer);
+	// std::cout << "Received command: " << command << std::endl;
+	std::string message_back = parse_command(input_command);
 	
-	std::string message_back = parse_command(command);
-	
-
 	data_processed = write(pipe_write_to, message_back.c_str(), message_back.length());
-	// std::cout << getpid() << " - wrote " << data_processed << " bytes: " << buffer << "\n";
-	// memset(buffer, '\0', strlen(buffer));
+
 	std::cout << "End update.\n";
 }
 
@@ -73,6 +71,31 @@ void Application::render() {
 	
 	window->viewport.width  = window_size.width;
 	window->viewport.height = window_size.height;
+
+	switch(action) //operator sterujący czyli jakaś zmienna zawierająca liczbę np. typu int
+	{
+	    case Application::nothing:
+	        std::cout << "Action: nothing\n";
+	    	break;
+	    case Application::quit:
+	    	this->stop();
+	        std::cout << "Action: quit\n";
+	    	break;
+	    case Application::save:
+	        std::cout << "Action: save\n";
+	    	break;
+	    case Application::draw_rectangle:
+	        std::cout << "Action: draw_rectangle\n";
+	    	break;
+	    case Application::draw_triangle:
+	        std::cout << "Action: draw triangle\n";
+	    	break;
+	    default:
+	        std::cout << "Action: unknown\n";
+	    break;
+	}
+	action = Application::nothing;
+
 
 	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
          	 	 150, 100, 1, 1, 1, 1,
@@ -95,32 +118,35 @@ std::string Application::parse_command(std::string& command) {
 
     std::string message_back = "";
 
-    if (strings.size() != 2) {
+    if (strings[0] == "quit") {
+		action = Application::quit;
+		message_back = "Received comand quit\n";
+	}
+    else if (strings.size() != 2) {
     	message_back = "Invalid command. Wrong number of parameters. It must have two parameters.";
     }
 	else if (strings[0] == "SET_WIDTH") {
-		message_back = "Comand set width\n";
+		message_back = "Received comand set width\n";
 		window_size.width = std::stoi(strings[1]);
 	}
 	else if (strings[0] == "SET_HEIGHT") {
-		message_back = "Comand set height\n";
+		message_back = "Received comand set height\n";
 		window_size.height = std::stoi(strings[1]);
 	}
 	else if (strings[0] == "DRAW_RECTANGLE") {
-		message_back = "Comand draw rectangle\n";
+		action = Application::draw_rectangle;
+		message_back = "Received comand draw rectangle\n";
 	}
 	else if (strings[0] == "DRAW_TRIANGLE") {
-		message_back = "Comand draw triangle\n";
+		action = Application::draw_triangle;
+		message_back = "Received comand draw triangle\n";
 	}
 	else if (strings[0] == "RENDER") {
-		message_back = "Comand render\n";
+		action = Application::save;
+		message_back = "Received comand render\n";
 	}	
-	else if (strings[0] == "quit") {
-		message_back = "Comand quit\n";
-		this->stop();
-	}
 	else{
-		message_back = "Unknown message";
+		message_back = "Received unknown command";
 	}
 
 	std::cout << message_back << std::endl;

@@ -52,13 +52,14 @@ private:
 	int pipe_read_from;
     int pipe_write_to;
 	int action;
-	// enum actions 
-	// {   
-	// 	spring = 0, 
- //    	summer = 4, 
- //    	autumn = 8,
- //    	winter = 12
-	// };
+	enum actions 
+	{   
+		nothing = 0,
+		quit,
+		save,
+		draw_rectangle, 
+    	draw_triangle, 
+	};
 };
 
 #endif
