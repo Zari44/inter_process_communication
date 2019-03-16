@@ -1,3 +1,5 @@
+default all:
+
 parent:
 	g++ -std=c++11 ./main_parent.cpp -o app1
 

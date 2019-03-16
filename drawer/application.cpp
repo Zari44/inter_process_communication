@@ -57,9 +57,10 @@ void Application::update() {
 }
 
 void Application::render() {
+	
 	window->viewport.width  = window_size.width;
 	window->viewport.height = window_size.height;
-	
+
 	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
          	 	 150, 100, 1, 1, 1, 1,
          	 	 150, 150, 1, 1, 1, 1,
