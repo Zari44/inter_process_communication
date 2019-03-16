@@ -18,7 +18,6 @@ int main()
   int child_to_parent[2];
   assert(pipe(child_to_parent) == 0);
 
-  char some_data[100];
   std::string input_data;
   char buffer[BUFSIZ + 1];
   pid_t fork_result;
@@ -40,9 +39,10 @@ int main()
 	    //std::to_string(child_to_parent[1]).c_str() };
       //char const* newenviron[] = { NULL };
       //execve(filename, newargv, newenviron);
-      execl("./app2", "app2", std::to_string(parent_to_child[READ]).c_str(),
-                              std::to_string(child_to_parent[WRITE]).c_str(), 
-                              (char *)0);
+      const char* drawer_path = "./drawer_app";
+      execl(drawer_path, drawer_path, std::to_string(parent_to_child[READ]).c_str(),
+                                      std::to_string(child_to_parent[WRITE]).c_str(), 
+                                      (char *)0);
       std::cout << "Child process failed\n"; 
       exit(EXIT_FAILURE);
     }
@@ -52,9 +52,9 @@ int main()
         // std::cout << "Parent. From stdin read: " << input_data << std::endl;
         data_processed = write(parent_to_child[WRITE], input_data.c_str(), input_data.size());
         // std::cout << getpid() << " - wrote " << data_processed << " bytes to child process\n";
-	      data_processed = read(child_to_parent[READ], buffer, 20);
-        // std::cout << getpid() << " - read " << data_processed << " bytes: " << buffer << "\n";
-        memset(buffer, '\0', strlen(buffer));
+	      data_processed = read(child_to_parent[READ], buffer, 100);
+        std::cout << "Message received from child: " << buffer << std::endl;
+        memset(buffer, '\0', data_processed);
       } while(strcmp(input_data.c_str(), "quit"));
     }
   }

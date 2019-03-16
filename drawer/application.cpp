@@ -30,16 +30,19 @@ void render_wrapper(){
 
 Application* Application::instance = NULL;
 
-Application::Application() {
+Application::Application(int pipe_read_from_, int pipe_write_to_) :
+	pipe_read_from(pipe_read_from_), 
+	pipe_write_to(pipe_write_to_) {
 	window_size.width = 640;
 	window_size.height = 480;
 }
 
-Application* Application::getInstance(){
+Application* Application::getInstance(int pipe_read_from_, int pipe_write_to_){
 	if (Application::instance == NULL)
-		Application::instance = new Application();
+		Application::instance = new Application(int pipe_read_from_, int pipe_write_to_);
     return Application::instance;
 }
+
 
 void Application::start() {
 	std::cout << "start" << std::endl;
