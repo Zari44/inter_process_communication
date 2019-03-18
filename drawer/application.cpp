@@ -17,6 +17,7 @@
 #include <iostream>
 #include<vector>
 #include <sstream>
+#include <fcntl.h>
 
 void update_wrapper(){
 	Application::getInstance()->update();
@@ -37,6 +38,10 @@ Application* Application::getInstance(int pipe_read_from_, int pipe_write_to_){
 Application::Application(int pipe_read_from_, int pipe_write_to_) :
 	pipe_read_from(pipe_read_from_), 
 	pipe_write_to(pipe_write_to_) {
+	//make read pipe not blockable
+
+    if ( fcntl( pipe_read_from_, F_SETFL, fcntl(pipe_read_from_, F_GETFL) | O_NONBLOCK) < 0)
+        exit(1);
 	window_size.width = 640;
 	window_size.height = 480;
 }
@@ -50,59 +55,61 @@ void Application::start() {
 }
 
 void Application::update() {
-	std::cout << "Start update:\n";
+	// std::cout << "Start update:\n";
 	const int COMMAND_MAX_SIZE = 100;
 	char buffer[BUFSIZ + 1];
     memset(buffer, '\0', sizeof(buffer));
 
 	int data_processed = read(pipe_read_from, buffer, COMMAND_MAX_SIZE);
 
-	std::string input_command(buffer);
-	// std::cout << "Received command: " << command << std::endl;
-	std::string message_back = parse_command(input_command);
+	if (data_processed >=0){
+		std::string input_command(buffer);
+		std::string message_back = parse_command(input_command);
 	
-	data_processed = write(pipe_write_to, message_back.c_str(), message_back.length());
-
-	std::cout << "End update.\n";
+		data_processed = write(pipe_write_to, message_back.c_str(), message_back.length());
+	}
+	else {
+		// std::cout << "Read timeout" << std::endl;
+	}
 }
 
 void Application::render() {
-	std::cout << "Start render\n";
-	
+
 	window->viewport.width  = window_size.width;
 	window->viewport.height = window_size.height;
 
-	switch(action) //operator sterujący czyli jakaś zmienna zawierająca liczbę np. typu int
+	switch(action) 
 	{
 	    case Application::nothing:
-	        std::cout << "Action: nothing\n";
+	        // std::cout << "Action: nothing\n";
 	    	break;
 	    case Application::quit:
 	    	this->stop();
-	        std::cout << "Action: quit\n";
+	        // std::cout << "Action: quit\n";
 	    	break;
 	    case Application::save:
-	        std::cout << "Action: save\n";
+	        // std::cout << "Action: save\n";
+	        S2D_Screenshot(window, "./screenshot.png");
 	    	break;
 	    case Application::draw_rectangle:
-	        std::cout << "Action: draw_rectangle\n";
+	        // std::cout << "Action: draw_rectangle\n";
+        	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
+     	 	 			 150, 100, 1, 1, 1, 1,
+     	 				 150, 150, 1, 1, 1, 1,
+     	 	  			 100, 150, 1, 1, 1, 1);
 	    	break;
 	    case Application::draw_triangle:
-	        std::cout << "Action: draw triangle\n";
+	        // std::cout << "Action: draw triangle\n";
+            S2D_DrawTriangle(320,  50, 1, 0, 0, 1,
+			  				 540, 430, 0, 1, 0, 1,
+							 100, 430, 0, 0, 1, 1);
 	    	break;
 	    default:
-	        std::cout << "Action: unknown\n";
+	        // std::cout << "Action: unknown\n";
 	    break;
 	}
-	action = Application::nothing;
-
-
-	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
-         	 	 150, 100, 1, 1, 1, 1,
-         	 	 150, 150, 1, 1, 1, 1,
-         	 	 100, 150, 1, 1, 1, 1);
-
-	std::cout << "Finished render\n";
+	// action = Application::nothing;
+	// std::cout << "Finished render\n";
 }
 
 std::string Application::parse_command(std::string& command) {
@@ -156,5 +163,4 @@ std::string Application::parse_command(std::string& command) {
 void Application::stop() {
 	S2D_Close(window); //exit the window loop
 	S2D_FreeWindow(window); //free the window
-	
 }

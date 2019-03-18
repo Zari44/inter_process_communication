@@ -85,16 +85,7 @@ int main(int argc, char *argv[]) {
   Application* app = Application::getInstance(pipe_read_from, pipe_write_to);
   app->start();
 
-  while(strcmp(buffer, "quit")) {
-    int data_processed = 0;
-    data_processed = read(pipe_read_from, buffer, BUFSIZ);
-    std::cout << getpid() << " - read " << data_processed << " bytes: " << buffer << "\n";
-    data_processed = write(pipe_write_to, buffer, strlen(buffer));
-    std::cout << getpid() << " - wrote " << data_processed << " bytes: " << buffer << "\n";
-    memset(buffer, '\0', strlen(buffer));
-  }
-  printf("Child process exits\n");
-  
+  printf("Drawer process exits\n");
   
   return 0;
 }
