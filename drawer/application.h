@@ -45,21 +45,20 @@ public:
 private:
 	Application(int pipe_read_from_, int pipe_write_to_);
 	~Application();
+	struct State{
+		State();
+		int draw;
+		enum shape { nic = 0, triangle, rectangle, };
+		bool quit;
+		bool save;
+		std::string screenshot_filename;
+	} state;
 	S2D_Window *window;
 	Size window_size;
 	std::string parse_command(std::string& command);
 	void stop();
 	int pipe_read_from;
     int pipe_write_to;
-	int action;
-	enum actions 
-	{   
-		nothing = 0,
-		quit,
-		save,
-		draw_rectangle, 
-    	draw_triangle, 
-	};
 };
 
 #endif

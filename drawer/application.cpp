@@ -27,6 +27,13 @@ void render_wrapper(){
 	Application::getInstance()->render();
 }
 
+Application::State::State(){
+	draw = Application::State::nic;
+	save = false;
+	screenshot_filename = "";
+	quit = false;
+}
+
 Application* Application::instance = NULL;
 
 Application* Application::getInstance(int pipe_read_from_, int pipe_write_to_){
@@ -36,6 +43,7 @@ Application* Application::getInstance(int pipe_read_from_, int pipe_write_to_){
 }
 
 Application::Application(int pipe_read_from_, int pipe_write_to_) :
+	state(),
 	pipe_read_from(pipe_read_from_), 
 	pipe_write_to(pipe_write_to_) {
 	//make read pipe not blockable
@@ -51,6 +59,7 @@ void Application::start() {
 	window = S2D_CreateWindow("Window", window_size.width, window_size.height,
 										update_wrapper, render_wrapper, S2D_RESIZABLE);
 	window->fps_cap = 1;
+	window->viewport.mode = S2D_EXPAND; // allows to resize window
 	S2D_Show(window);
 }
 
@@ -75,41 +84,39 @@ void Application::update() {
 
 void Application::render() {
 
+	if (state.quit){
+		this->stop();
+	}
+
 	window->viewport.width  = window_size.width;
 	window->viewport.height = window_size.height;
 
-	switch(action) 
-	{
-	    case Application::nothing:
-	        // std::cout << "Action: nothing\n";
-	    	break;
-	    case Application::quit:
-	    	this->stop();
-	        // std::cout << "Action: quit\n";
-	    	break;
-	    case Application::save:
-	        // std::cout << "Action: save\n";
-	        S2D_Screenshot(window, "./screenshot.png");
-	    	break;
-	    case Application::draw_rectangle:
-	        // std::cout << "Action: draw_rectangle\n";
-        	S2D_DrawQuad(100, 100, 1, 1, 1, 1,
-     	 	 			 150, 100, 1, 1, 1, 1,
-     	 				 150, 150, 1, 1, 1, 1,
-     	 	  			 100, 150, 1, 1, 1, 1);
-	    	break;
-	    case Application::draw_triangle:
-	        // std::cout << "Action: draw triangle\n";
+	switch (state.draw){
+		case Application::State::nic:
+		break;
+
+		case Application::State::triangle:
             S2D_DrawTriangle(320,  50, 1, 0, 0, 1,
-			  				 540, 430, 0, 1, 0, 1,
-							 100, 430, 0, 0, 1, 1);
-	    	break;
-	    default:
-	        // std::cout << "Action: unknown\n";
-	    break;
+	  				 		 540, 430, 0, 1, 0, 1,
+					 		 100, 430, 0, 0, 1, 1);
+		break;
+
+		case Application::State::rectangle:
+        	S2D_DrawQuad(100, 100, 1, 0, 0, 1,
+	 	 			     150, 100, 0, 1, 0, 1,
+	 				     150, 150, 0, 0, 1, 1,
+	 	  			     100, 150, 0, 0, 0, 1);
+		break;
+
+		default:
+		break;
+
 	}
-	// action = Application::nothing;
-	// std::cout << "Finished render\n";
+
+	if (state.save){
+		state.save = false;
+		S2D_Screenshot(window, state.screenshot_filename.c_str());
+	}
 }
 
 std::string Application::parse_command(std::string& command) {
@@ -126,31 +133,33 @@ std::string Application::parse_command(std::string& command) {
     std::string message_back = "";
 
     if (strings[0] == "quit") {
-		action = Application::quit;
-		message_back = "Received comand quit\n";
+		state.quit = true;
+		message_back = "Received command quit";
 	}
     else if (strings.size() != 2) {
     	message_back = "Invalid command. Wrong number of parameters. It must have two parameters.";
     }
 	else if (strings[0] == "SET_WIDTH") {
-		message_back = "Received comand set width\n";
+		message_back = "Received command set width";
 		window_size.width = std::stoi(strings[1]);
+		window->viewport.width = window_size.width;
 	}
 	else if (strings[0] == "SET_HEIGHT") {
-		message_back = "Received comand set height\n";
+		message_back = "Received command set height";
 		window_size.height = std::stoi(strings[1]);
 	}
 	else if (strings[0] == "DRAW_RECTANGLE") {
-		action = Application::draw_rectangle;
-		message_back = "Received comand draw rectangle\n";
+		state.draw = Application::State::rectangle;
+		message_back = "Received command draw rectangle";
 	}
 	else if (strings[0] == "DRAW_TRIANGLE") {
-		action = Application::draw_triangle;
-		message_back = "Received comand draw triangle\n";
+		state.draw = Application::State::triangle;
+		message_back = "Received command draw triangle";
 	}
 	else if (strings[0] == "RENDER") {
-		action = Application::save;
-		message_back = "Received comand render\n";
+		state.save = true;
+		state.screenshot_filename = strings[1] + ".png";
+		message_back = "Received command render screenshot";		
 	}	
 	else{
 		message_back = "Received unknown command";
