@@ -3,35 +3,25 @@
 
 #include<simple2d.h>
 #include<string>
+#include<vector>
 
 struct Size{
 	int width;
 	int height;
 };
 
-/*class Application{
-public:
-	void start();
-	static Application& getInstance(){
-        static Application instance;
-        return instance;
-    }
-	Application(Application const&)     = delete;
-    void operator=(Application const&)  = delete;
-private:
-	Application();
-    static Application instance;	
-    static void update_wrapper();
-	static void render_wrapper();
-	S2D_Window *window;
-	Size window_size;
-	std::string command;
-	void update();
-	void render();
-	void stop();
-	static void static_update() {};
-	static void static_render() {};
-};*/
+// SET_WIDTH W - 
+// komenda określa szerokość ekranu w pikselach, W jest liczbą całkowitą określającą ilość pikseli.
+// SET_HEIGHT H - 
+// komenda określa wysokość ekranu w pikselach, H jest liczbą całkowitą określającą ilość pikseli.
+// DRAW_RECTANGLE X,Y,W,H - 
+// komenda służy do rysowania prostokąta, którego lewy górny róg ma współrzędne X,Y a W i H 
+// oznaczają odpowiednio szerokość i wysokość prostokąta.
+// DRAW_TRIANGLE X1,Y1,X2,Y2,X3,Y3 - 
+// komenda służy do rysowania trójkąta którego rogi mają współrzędne poziome i pionowe 
+// odpowiednio w punktach (X1,Y1), (X2,Y2) oraz (X3,Y3).
+// RENDER NAME - przygotowuje obraz oraz zapisuje go do pliku w wybranym formacie graficznym
+ // (BMP, PNG, JPEG) pod nazwą określoną parametrem “NAME”.
 
 class Application{
 public:
@@ -52,6 +42,8 @@ private:
 		bool quit;
 		bool save;
 		std::string screenshot_filename;
+		std::vector<int> X;
+		std::vector<int> Y;
 	} state;
 	S2D_Window *window;
 	Size window_size;
@@ -59,6 +51,10 @@ private:
 	void stop();
 	int pipe_read_from;
     int pipe_write_to;
+    void draw_rectangle();
+    void draw_triangle();
+    void parse_triangle_size(std::string& size_command);
+    void parse_rectangle_size(std::string& size_command);
 };
 
 #endif

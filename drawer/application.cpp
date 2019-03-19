@@ -15,9 +15,10 @@
 #include "application.h"
 // #include<simple2d.h>
 #include <iostream>
-#include<vector>
+
 #include <sstream>
 #include <fcntl.h>
+#include <assert.h>
 
 void update_wrapper(){
 	Application::getInstance()->update();
@@ -27,7 +28,9 @@ void render_wrapper(){
 	Application::getInstance()->render();
 }
 
-Application::State::State(){
+Application::State::State() : 
+	X(4,0),
+	Y(4,0){
 	draw = Application::State::nic;
 	save = false;
 	screenshot_filename = "";
@@ -47,7 +50,6 @@ Application::Application(int pipe_read_from_, int pipe_write_to_) :
 	pipe_read_from(pipe_read_from_), 
 	pipe_write_to(pipe_write_to_) {
 	//make read pipe not blockable
-
     if ( fcntl( pipe_read_from_, F_SETFL, fcntl(pipe_read_from_, F_GETFL) | O_NONBLOCK) < 0)
         exit(1);
 	window_size.width = 640;
@@ -64,7 +66,6 @@ void Application::start() {
 }
 
 void Application::update() {
-	// std::cout << "Start update:\n";
 	const int COMMAND_MAX_SIZE = 100;
 	char buffer[BUFSIZ + 1];
     memset(buffer, '\0', sizeof(buffer));
@@ -88,24 +89,23 @@ void Application::render() {
 		this->stop();
 	}
 
-	window->viewport.width  = window_size.width;
-	window->viewport.height = window_size.height;
+	window->width = 800;
+	window->height = 1000;
+
+	// window->viewport.width  = window_size.width;
+	// window->viewport.height = window_size.height;
 
 	switch (state.draw){
 		case Application::State::nic:
+
 		break;
 
 		case Application::State::triangle:
-            S2D_DrawTriangle(320,  50, 1, 0, 0, 1,
-	  				 		 540, 430, 0, 1, 0, 1,
-					 		 100, 430, 0, 0, 1, 1);
+			draw_triangle();
 		break;
 
 		case Application::State::rectangle:
-        	S2D_DrawQuad(100, 100, 1, 0, 0, 1,
-	 	 			     150, 100, 0, 1, 0, 1,
-	 				     150, 150, 0, 0, 1, 1,
-	 	  			     100, 150, 0, 0, 0, 1);
+			draw_rectangle();
 		break;
 
 		default:
@@ -143,17 +143,21 @@ std::string Application::parse_command(std::string& command) {
 		message_back = "Received command set width";
 		window_size.width = std::stoi(strings[1]);
 		window->viewport.width = window_size.width;
+		window->width = window_size.width;
 	}
 	else if (strings[0] == "SET_HEIGHT") {
 		message_back = "Received command set height";
 		window_size.height = std::stoi(strings[1]);
+		window->height = window_size.height;
 	}
 	else if (strings[0] == "DRAW_RECTANGLE") {
 		state.draw = Application::State::rectangle;
+		parse_rectangle_size(strings[1]);
 		message_back = "Received command draw rectangle";
 	}
 	else if (strings[0] == "DRAW_TRIANGLE") {
 		state.draw = Application::State::triangle;
+		parse_triangle_size(strings[1]);
 		message_back = "Received command draw triangle";
 	}
 	else if (strings[0] == "RENDER") {
@@ -172,4 +176,55 @@ std::string Application::parse_command(std::string& command) {
 void Application::stop() {
 	S2D_Close(window); //exit the window loop
 	S2D_FreeWindow(window); //free the window
+}
+
+
+void Application::draw_rectangle(){
+	S2D_DrawQuad(state.X[0], state.Y[0], 1, 0, 0, 1,
+	     	 	 state.X[1], state.Y[1], 0, 1, 0, 1,
+		     	 state.X[2], state.Y[2], 0, 0, 1, 1,
+		     	 state.X[3], state.Y[3], 0, 0, 0, 1);
+}
+
+void Application::draw_triangle(){
+
+    S2D_DrawTriangle(state.X[0], state.Y[0], 1, 0, 0, 1,
+			 		 state.X[1], state.Y[1], 0, 1, 0, 1,
+			 		 state.X[2], state.Y[2], 0, 0, 1, 1);
+}
+
+void Application::parse_triangle_size(std::string& size_command){
+	std::vector<int> coordinates;
+	std::string coordinate;
+	std::stringstream command;
+	command.str(size_command);
+	while(std::getline(command, coordinate, ',')){
+   		coordinates.push_back(std::stoi(coordinate));
+	}
+	assert(coordinates.size() == 6);
+	for (unsigned int i = 0; i < coordinates.size()/2; ++i){
+		state.X[i] = coordinates[2*i];
+		state.Y[i] = coordinates[2*i+1];
+	}
+}
+
+void Application::parse_rectangle_size(std::string& size_command){
+	std::vector<int> parameters;
+	std::string parameter;
+	std::stringstream command;
+	command.str(size_command);
+	while(std::getline(command, parameter, ',')){
+   		parameters.push_back(std::stoi(parameter));
+	}
+	assert(parameters.size() == 4);
+	state.X[0] = parameters[0];
+	state.Y[1] = parameters[1];
+	int w = parameters[2];
+	int h = parameters[3];
+	state.X[1] = state.X[0]+w;
+	state.Y[1] = state.Y[0];
+	state.X[2] = state.X[0] + w;
+	state.Y[2] = state.Y[0] + h;
+	state.X[3] = state.X[0];
+	state.Y[3] = state.Y[0] + h;
 }

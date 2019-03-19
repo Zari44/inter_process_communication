@@ -11,7 +11,7 @@ DRAWER_TARGET = drawer_app
 default: all
 
 drawer:
-	$(CXX)  -I $(DRAWER_PATH) $(CXXFLAGS) $(LIBS) `simple2d --libs` $(DRAWER_PATH)/main_drawer.cpp  -o $(DRAWER_TARGET)
+	$(CXX) $(CXXFLAGS) -I $(DRAWER_PATH) $(LIBS) `simple2d --libs` $(DRAWER_PATH)/main_drawer.cpp  -o $(DRAWER_TARGET)
 
 ipc: 
 	$(CXX) $(CXXFLAGS) ./ipc/main_parent.cpp -o app1
