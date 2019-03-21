@@ -1,0 +1,3 @@
+DRAW_RECTANGLE 100,150,100,200
+RENDER prostokacik
+quit

@@ -10,18 +10,6 @@ struct Size{
 	int height;
 };
 
-// SET_WIDTH W - 
-// komenda określa szerokość ekranu w pikselach, W jest liczbą całkowitą określającą ilość pikseli.
-// SET_HEIGHT H - 
-// komenda określa wysokość ekranu w pikselach, H jest liczbą całkowitą określającą ilość pikseli.
-// DRAW_RECTANGLE X,Y,W,H - 
-// komenda służy do rysowania prostokąta, którego lewy górny róg ma współrzędne X,Y a W i H 
-// oznaczają odpowiednio szerokość i wysokość prostokąta.
-// DRAW_TRIANGLE X1,Y1,X2,Y2,X3,Y3 - 
-// komenda służy do rysowania trójkąta którego rogi mają współrzędne poziome i pionowe 
-// odpowiednio w punktach (X1,Y1), (X2,Y2) oraz (X3,Y3).
-// RENDER NAME - przygotowuje obraz oraz zapisuje go do pliku w wybranym formacie graficznym
- // (BMP, PNG, JPEG) pod nazwą określoną parametrem “NAME”.
 
 class Application{
 public:
@@ -34,7 +22,10 @@ public:
     void operator=(Application const&)  = delete;
 private:
 	Application(int pipe_read_from_, int pipe_write_to_);
-	~Application();
+	~Application() {
+		if (window)
+			S2D_FreeWindow(window); //free the window
+	};
 	struct State{
 		State();
 		int draw;

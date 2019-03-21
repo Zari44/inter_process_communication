@@ -57,8 +57,7 @@ Application::Application(int pipe_read_from_, int pipe_write_to_) :
 }
 
 void Application::start() {
-	std::cout << "start" << std::endl;
-	window = S2D_CreateWindow("Window", window_size.width, window_size.height,
+	window = S2D_CreateWindow("Zadanie rekrutacyjne", window_size.width, window_size.height,
 										update_wrapper, render_wrapper, S2D_RESIZABLE);
 	window->fps_cap = 10;
 	window->viewport.mode = S2D_SCALE; // allows to resize window
@@ -229,4 +228,5 @@ void Application::mapRectangleParametersToState(const std::vector<int>& paramete
 void Application::stop() {
 	S2D_Close(window); //exit the window loop
 	S2D_FreeWindow(window); //free the window
+	window = NULL;
 }
