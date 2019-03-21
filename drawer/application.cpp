@@ -60,8 +60,8 @@ void Application::start() {
 	std::cout << "start" << std::endl;
 	window = S2D_CreateWindow("Window", window_size.width, window_size.height,
 										update_wrapper, render_wrapper, S2D_RESIZABLE);
-	window->fps_cap = 1;
-	window->viewport.mode = S2D_EXPAND; // allows to resize window
+	window->fps_cap = 10;
+	window->viewport.mode = S2D_SCALE; // allows to resize window
 	S2D_Show(window);
 }
 
@@ -74,12 +74,10 @@ void Application::update() {
 
 	if (data_processed >=0){
 		std::string input_command(buffer);
-		std::string message_back = parse_command(input_command);
+		std::vector<std::string> command_words = parseCommand(input_command);
+		std::string message_back = chooseAction(command_words);
 	
 		data_processed = write(pipe_write_to, message_back.c_str(), message_back.length());
-	}
-	else {
-		// std::cout << "Read timeout" << std::endl;
 	}
 }
 
@@ -89,16 +87,7 @@ void Application::render() {
 		this->stop();
 	}
 
-	window->width = 800;
-	window->height = 1000;
-
-	// window->viewport.width  = window_size.width;
-	// window->viewport.height = window_size.height;
-
 	switch (state.draw){
-		case Application::State::nic:
-
-		break;
 
 		case Application::State::triangle:
 			draw_triangle();
@@ -119,50 +108,55 @@ void Application::render() {
 	}
 }
 
-std::string Application::parse_command(std::string& command) {
-	std::vector<std::string> strings;
+std::vector<std::string> Application::parseCommand(std::string& command) {
+	std::vector<std::string> commands;
 	std::stringstream command_stream;
 	command_stream << command;
 	std::string word;
 
-	while (std::getline(command_stream, word, ' ')) {
-        std::cout << word << std::endl;
-        strings.push_back(word);
+	while ( std::getline(command_stream, word, ' ') ){
+        commands.push_back(word);
     }
 
-    std::string message_back = "";
+    return commands;
+}
 
-    if (strings[0] == "quit") {
-		state.quit = true;
-		message_back = "Received command quit";
-	}
-    else if (strings.size() != 2) {
-    	message_back = "Invalid command. Wrong number of parameters. It must have two parameters.";
+std::string Application::chooseAction(const std::vector<std::string>& command_words){
+	std::string message_back = "";
+
+    if (command_words.size() != 2){
+    	if (command_words[0] == "quit"){
+    		state.quit = true;
+			message_back = "Received command quit";
+    	}
+    	else{
+    		message_back = "Invalid command. Wrong number of parameters. It must have two parameters.";
+    	}
     }
-	else if (strings[0] == "SET_WIDTH") {
+	else if (command_words[0] == "SET_WIDTH") {
 		message_back = "Received command set width";
-		window_size.width = std::stoi(strings[1]);
+		window_size.width = std::stoi(command_words[1]);
 		window->viewport.width = window_size.width;
 		window->width = window_size.width;
 	}
-	else if (strings[0] == "SET_HEIGHT") {
+	else if (command_words[0] == "SET_HEIGHT") {
 		message_back = "Received command set height";
-		window_size.height = std::stoi(strings[1]);
+		window_size.height = std::stoi(command_words[1]);
 		window->height = window_size.height;
 	}
-	else if (strings[0] == "DRAW_RECTANGLE") {
+	else if (command_words[0] == "DRAW_RECTANGLE") {
 		state.draw = Application::State::rectangle;
-		parse_rectangle_size(strings[1]);
+		parse_rectangle_size(command_words[1]);
 		message_back = "Received command draw rectangle";
 	}
-	else if (strings[0] == "DRAW_TRIANGLE") {
+	else if (command_words[0] == "DRAW_TRIANGLE") {
 		state.draw = Application::State::triangle;
-		parse_triangle_size(strings[1]);
+		parse_triangle_size(command_words[1]);
 		message_back = "Received command draw triangle";
 	}
-	else if (strings[0] == "RENDER") {
+	else if (command_words[0] == "RENDER") {
 		state.save = true;
-		state.screenshot_filename = strings[1] + ".png";
+		state.screenshot_filename = command_words[1];
 		message_back = "Received command render screenshot";		
 	}	
 	else{
@@ -173,12 +167,6 @@ std::string Application::parse_command(std::string& command) {
 	return message_back;
 }
 
-void Application::stop() {
-	S2D_Close(window); //exit the window loop
-	S2D_FreeWindow(window); //free the window
-}
-
-
 void Application::draw_rectangle(){
 	S2D_DrawQuad(state.X[0], state.Y[0], 1, 0, 0, 1,
 	     	 	 state.X[1], state.Y[1], 0, 1, 0, 1,
@@ -187,13 +175,12 @@ void Application::draw_rectangle(){
 }
 
 void Application::draw_triangle(){
-
     S2D_DrawTriangle(state.X[0], state.Y[0], 1, 0, 0, 1,
 			 		 state.X[1], state.Y[1], 0, 1, 0, 1,
 			 		 state.X[2], state.Y[2], 0, 0, 1, 1);
 }
 
-void Application::parse_triangle_size(std::string& size_command){
+void Application::parse_triangle_size(const std::string& size_command){
 	std::vector<int> coordinates;
 	std::string coordinate;
 	std::stringstream command;
@@ -201,14 +188,18 @@ void Application::parse_triangle_size(std::string& size_command){
 	while(std::getline(command, coordinate, ',')){
    		coordinates.push_back(std::stoi(coordinate));
 	}
+	mapTriangleParametersToState(coordinates);
+}
+
+void Application::mapTriangleParametersToState(const std::vector<int>& coordinates){
 	assert(coordinates.size() == 6);
 	for (unsigned int i = 0; i < coordinates.size()/2; ++i){
 		state.X[i] = coordinates[2*i];
 		state.Y[i] = coordinates[2*i+1];
-	}
+	}	
 }
 
-void Application::parse_rectangle_size(std::string& size_command){
+void Application::parse_rectangle_size(const std::string& size_command){
 	std::vector<int> parameters;
 	std::string parameter;
 	std::stringstream command;
@@ -216,15 +207,26 @@ void Application::parse_rectangle_size(std::string& size_command){
 	while(std::getline(command, parameter, ',')){
    		parameters.push_back(std::stoi(parameter));
 	}
+	mapRectangleParametersToState(parameters);
+}
+
+// convert w,y,w,h into rectangle vertices
+void Application::mapRectangleParametersToState(const std::vector<int>& parameters){
 	assert(parameters.size() == 4);
-	state.X[0] = parameters[0];
-	state.Y[1] = parameters[1];
 	int w = parameters[2];
 	int h = parameters[3];
-	state.X[1] = state.X[0]+w;
+
+	state.X[0] = parameters[0];
+	state.Y[0] = parameters[1];
+	state.X[1] = state.X[0] + w;
 	state.Y[1] = state.Y[0];
-	state.X[2] = state.X[0] + w;
-	state.Y[2] = state.Y[0] + h;
-	state.X[3] = state.X[0];
-	state.Y[3] = state.Y[0] + h;
+	state.X[2] = state.X[1];
+	state.Y[2] = state.Y[1] + h;
+	state.X[3] = state.X[2] - w;
+	state.Y[3] = state.Y[2];
+}
+
+void Application::stop() {
+	S2D_Close(window); //exit the window loop
+	S2D_FreeWindow(window); //free the window
 }

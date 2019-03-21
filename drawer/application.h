@@ -47,14 +47,17 @@ private:
 	} state;
 	S2D_Window *window;
 	Size window_size;
-	std::string parse_command(std::string& command);
+	std::vector<std::string> parseCommand(std::string& command); 
+	std::string chooseAction(const std::vector<std::string>& command_words);
 	void stop();
 	int pipe_read_from;
     int pipe_write_to;
     void draw_rectangle();
     void draw_triangle();
-    void parse_triangle_size(std::string& size_command);
-    void parse_rectangle_size(std::string& size_command);
+    void mapRectangleParametersToState(const std::vector<int>& parameters);
+    void mapTriangleParametersToState(const std::vector<int>& coordinates);
+    void parse_triangle_size(const std::string& size_command);
+    void parse_rectangle_size(const std::string& size_command);
 };
 
 #endif

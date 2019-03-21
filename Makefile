@@ -1,39 +1,26 @@
 CXX = g++
 CXXFLAGS = -Wall -g -std=c++11
 
+# main app
+MAIN_PATH = ./main
+MAIN_TARGET = main_app
+
 # drawer
 DRAWER_PATH = ./drawer
 LIBS = $(DRAWER_PATH)/application.cpp 
 DRAWER_TARGET = drawer_app
 
-
-
-default: all
-
 drawer:
 	$(CXX) $(CXXFLAGS) -I $(DRAWER_PATH) $(LIBS) `simple2d --libs` $(DRAWER_PATH)/main_drawer.cpp  -o $(DRAWER_TARGET)
 
-ipc: 
-	$(CXX) $(CXXFLAGS) ./ipc/main_parent.cpp -o app1
-	$(CXX) $(CXXFLAGS) ./ipc/main_child.cpp -o app2
+main: 
+	$(CXX) $(CXXFLAGS) $(MAIN_PATH)/main_app.cpp -o $(MAIN_TARGET)
 
-all: ipc drawer
+all: main drawer
+
+default: all
 
 clean:
 	rm -f $(DRAWER_TARGET)
-	rm -f ./app1 ./app2
+	rm -f $(MAIN_TARGET)
 
-
-
-# default: all
-
-# parent:
-# 	g++ -std=c++11 ./ipc/main_parent.cpp -o app1
-
-# child:
-# 	
-
-# all: parent child
-
-# clean:
-# 	rm -rf ./app1 ./app2
